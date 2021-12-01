@@ -22,3 +22,59 @@ INFB1_NPX_data <- OlinkAnalyze::read_NPX(filename = here::here("data/20210107_St
 B2_NPX_data <- OlinkAnalyze::read_NPX(filename = here::here("data/20202245_ Stinson_NPX.xlsx"))
 
 ```
+
+```{r Bridge normalization, warning = FALSE, echo = false}
+
+## Select only the CVD II panel from batch 2
+CVDB2_NPX_data <- B2_NPX_data %>%
+  dplyr::filter(Panel == 'Olink Target 96 Cardiovascular II')
+
+## CVDII Bridge Normalization
+CVD_npx_df1 <- CVDB1_NPX_data %>% dplyr::mutate(Project = '20191262')
+CVD_npx_df2 <- CVDB2_NPX_data %>% dplyr::mutate(Project = '20202245')
+
+overlap_samples <- intersect((CVD_npx_df1 %>% filter(!grepl("control", SampleID, ignore.case=T)))$SampleID,
+                             (CVD_npx_df2 %>% filter(!grepl("control", SampleID, ignore.case=T)))$SampleID)
+
+CVD_bridged_df <- OlinkAnalyze::olink_normalization(df1 = CVD_npx_df1,
+                      df2 = CVD_npx_df2,
+                      overlapping_samples_df1 = overlap_samples,
+                      df1_project_nr = '20191262',
+                      df2_project_nr = '20202245',
+                      reference_project = '20191262')
+
+
+## Select only INF panel from batch 2
+INFB2_NPX_data <- B2_NPX_data %>%
+  dplyr::filter(Panel == 'Olink Target 96 Inflammation')
+
+## INF Bridge Normalization
+INF_npx_df1 <- INFB1_NPX_data %>% dplyr::mutate(Project = '20191262')
+INF_npx_df2 <- INFB2_NPX_data %>% dplyr::mutate(Project = '20202245')
+
+overlap_samples <- intersect((INF_npx_df1 %>% filter(!grepl("control", SampleID, ignore.case=T)))$SampleID,
+                             (INF_npx_df2 %>% filter(!grepl("control", SampleID, ignore.case=T)))$SampleID)
+
+INF_bridged_df <- OlinkAnalyze::olink_normalization(df1 = INF_npx_df1,
+                      df2 = INF_npx_df2,
+                      overlapping_samples_df1 = overlap_samples,
+                      df1_project_nr = '20191262',
+                      df2_project_nr = '20202245',
+                      reference_project = '20191262')
+
+## Rename proteins
+renamed_CVD_bridged_df <- CVD_bridged_df %>%
+  dplyr::mutate(Assay = gsub("-", "", Assay)) %>%
+  dplyr::mutate(Assay = gsub(" ", "_", Assay)) %>%
+  dplyr::mutate(Assay = gsub("alpha", "a", Assay)) %>%
+  dplyr::mutate(Assay = gsub("beta", "b", Assay)) %>%
+  dplyr::mutate(Assay = gsub("gamma", "g", Assay))
+
+renamed_INF_bridged_df <- INF_bridged_df %>%
+  dplyr::mutate(Assay = gsub("-", "", Assay)) %>%
+  dplyr::mutate(Assay = gsub(" ", "_", Assay)) %>%
+  dplyr::mutate(Assay = gsub("alpha", "a", Assay)) %>%
+  dplyr::mutate(Assay = gsub("beta", "b", Assay)) %>%
+  dplyr::mutate(Assay = gsub("gamma", "g", Assay))
+
+```
