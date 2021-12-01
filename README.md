@@ -3,7 +3,7 @@
 This project is for analyses of Olink data in The Holbaek Study
 
 
-# Brief description of folder and file contents
+## Brief description of folder and file contents
 
 
 The following folders contain:
@@ -12,7 +12,7 @@ The following folders contain:
 - `doc/`: Rmd
 - `R/`: R scripts
 
-# Installing project R package dependencies
+## Installing project R package dependencies
 
 If dependencies have been managed by using `usethis::use_package("packagename")`
 through the `DESCRIPTION` file, installing dependencies is as easy as opening the
@@ -23,7 +23,7 @@ through the `DESCRIPTION` file, installing dependencies is as easy as opening th
 
 You'll need to have remotes installed for this to work.
 
-# Resource
+## Resource
 
 For more information on this folder and file workflow and setup, check
 out the [prodigenr](https://rostools.github.io/prodigenr) online
