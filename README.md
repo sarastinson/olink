@@ -8,7 +8,6 @@ This project is for analyses of Olink data in The Holbaek Study
 
 The following folders contain:
 
-- `data/`: metadata - DO NOT push to github
 - `doc/`: Rmd
 - `R/`: R scripts
 
