@@ -1,0 +1,18 @@
+---
+title: "QC baseline"
+author: "Sara Elizabeth Stinson"
+date: "01/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source(here::here("R/package-loading.R"))
+```
+
+```{r load data, warning = FALSE, echo = false}
+
+## LOAD CVDII PANEL BATCH 1 (N = 645)
+CVDB1_NPX_data <- OlinkAnalyze::read_NPX(filename = "/Volumes/mjl259/1_Cohorts/1_TARGET/2_Projects/2_Olink_Proteomics/2_Raw_Data/Sent_from_Olink/CVDII_645/20191262_Stinson_NPX.xlsx")
+
+```
