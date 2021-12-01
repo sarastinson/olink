@@ -6,9 +6,9 @@ This project is for analyses of Olink data in The Holbaek Study
 
 The following folders contain:
 
-- `data/`: Results and assay metadata - DO NOT push to github    
-- `doc/`: Contains Rmd files  
-- `R/`: Contains R scripts  
+- `data/`: assay and metadata - DO NOT push to github    
+- `doc/`: contains Rmd files  
+- `R/`: contains R scripts  
 
 ## Installing project software dependencies
 
