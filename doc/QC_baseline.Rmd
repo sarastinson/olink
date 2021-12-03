@@ -60,7 +60,7 @@ CVD_bridge <- OlinkAnalyze::olink_normalization(
 INFB2_NPX_data <- B2_NPX_data %>% dplyr::filter(Panel == 'Olink Target 96 Inflammation')
 
 ## Add Project Numbers
-INF_npx_df1 <- INFB1_NPX_data %>% dplyr::mutate(Project = '20191262')
+INF_npx_df1 <- INFB1_NPX_data %>% dplyr::mutate(Project = '20210107')
 INF_npx_df2 <- INFB2_NPX_data %>% dplyr::mutate(Project = '20202245')
 
 ## Identify Bridging Samples
@@ -72,9 +72,9 @@ INF_bridge <- OlinkAnalyze::olink_normalization(
   df1 = INF_npx_df1,
   df2 = INF_npx_df2,
   overlapping_samples_df1 = overlap_samples,
-  df1_project_nr = '20191262',
+  df1_project_nr = '20210107',
   df2_project_nr = '20202245',
-  reference_project = '20191262'
+  reference_project = '20210107'
 )
 
 ```
@@ -113,8 +113,11 @@ CVDRR_bridge <- OlinkAnalyze::olink_normalization(
   reference_project = '20191262'
 )
 
+CVDRR <- CVDRR_bridge %>%
+  dplyr::filter(Project == '20212246')
+
 ## Remove Bridge Samples
-CVDRR_bridge <- dplyr::filter(CVDRR_bridge, (!SampleID %in% bridge_samples))
+CVDrr_bridge <- dplyr::filter(CVDRR, (!SampleID %in% bridge_samples))
 
 ## Select INF Panel from Reruns
 INF_npx_df3 <- MLRRb_NPX_data %>% 
@@ -125,13 +128,16 @@ INFRR_bridge <- OlinkAnalyze::olink_normalization(
   df1 = INF_npx_df1,
   df2 = INF_npx_df3,
   overlapping_samples_df1 = bridge_samples,
-  df1_project_nr = '20191262',
+  df1_project_nr = '20210107',
   df2_project_nr = '20212246',
-  reference_project = '20191262'
+  reference_project = '20210107'
 )
 
+INFRR <- INFRR_bridge %>%
+  dplyr::filter(Project == '20212246')
+
 ## Remove Bridge Samples
-INFRR_bridge <- dplyr::filter(INFRR_bridge, (!SampleID %in% bridge_samples))
+INFrr_bridge <- dplyr::filter(INFRR_bridge, (!SampleID %in% bridge_samples))
 
 ```
 
@@ -139,7 +145,7 @@ INFRR_bridge <- dplyr::filter(INFRR_bridge, (!SampleID %in% bridge_samples))
 
 ## Merge CVDII Panel Batches
 merge_CVD_panels  <- CVD_bridge %>%
-  dplyr::full_join(CVDRR_bridge) %>%
+  dplyr::full_join(CVDrr_bridge) %>%
   dplyr::mutate(Assay = gsub("-", "", Assay)) %>%
   dplyr::mutate(Assay = gsub(" ", "_", Assay)) %>%
   dplyr::mutate(Assay = gsub("alpha", "a", Assay)) %>%
@@ -163,11 +169,10 @@ CVD_qc <- merge_CVD_panels %>%
 
 ## Convert from long to wide format
 CVD_wide <- CVD_qc %>%
-  dplyr::select(SampleID, Assay, PlateID, Panel, corrected_NPX, QC_Warning, Project) %>%
+  dplyr::select(SampleID, Assay, PlateID, corrected_NPX, QC_Warning) %>%
   pivot_wider(names_from = Assay,
               values_from = corrected_NPX) %>% 
-  dplyr::rename(Panel_CVDII = Panel,
-                plateID_CVDII = PlateID) %>% 
+  dplyr::rename(plateID_CVDII = PlateID) %>% 
   dplyr::distinct(SampleID, .keep_all = TRUE) # removes duplicate bridging samples
 
 ```
@@ -176,7 +181,7 @@ CVD_wide <- CVD_qc %>%
 
 ## Merge INF Panel Batches
 merge_INF_panels  <- INF_bridge %>%
-  dplyr::full_join(INFRR_bridge) %>%
+  dplyr::full_join(INFrr_bridge) %>%
   dplyr::mutate(Assay = gsub("-", "", Assay)) %>%
   dplyr::mutate(Assay = gsub(" ", "_", Assay)) %>%
   dplyr::mutate(Assay = gsub("alpha", "a", Assay)) %>%
@@ -199,11 +204,10 @@ INF_qc <- merge_INF_panels %>%
 
 ## Convert from long to wide format
 INF_wide <- INF_qc %>%
-  dplyr::select(SampleID, Assay, PlateID, Panel, corrected_NPX, QC_Warning, Project) %>%
+  dplyr::select(SampleID, Assay, PlateID, corrected_NPX, QC_Warning) %>%
   pivot_wider(names_from = Assay,
               values_from = corrected_NPX) %>% 
-  dplyr::rename(Panel_INF = Panel,
-                plateID_INF = PlateID) %>% 
+  dplyr::rename(plateID_INF = PlateID) %>% 
   dplyr::distinct(SampleID, .keep_all = TRUE) # removes duplicate bridging samples
 
 ```
@@ -215,9 +219,14 @@ olink_df <- INF_wide %>%
   dplyr::select(-IL6, - CXCL1, -SCF, -IL18, -FGF21, -CCL3) %>% # Remove 6 duplicate proteins from INF panel
   dplyr::full_join(CVD_wide) %>%
   dplyr::rename(blood_sample_ID = SampleID) %>%
-  dplyr::relocate(blood_sample_ID, Project, Panel_INF, plateID_INF, Panel_CVDII, plateID_CVDII, QC_Warning)
+  dplyr::select(-QC_Warning) %>%
+  dplyr::mutate(batch_INF = str_extract(plateID_INF, '[^-]\\w+')) %>%
+  dplyr::mutate(batch_CVDII = str_extract(plateID_CVDII, '[^-]\\w+')) %>%
+  dplyr::relocate(blood_sample_ID, batch_INF, plateID_INF, batch_CVDII, plateID_CVDII)
 
 ## Save QC'd Data
-write.table(olink_df, file = here::here("data/olink_CVDII_INF_baseline_plasma.txt"), sep = "\t", quote = F)
+write.table(olink_df, file = here::here("data/olink_CVDII_INF_baseline_plasma_wide.txt"), sep = "\t", quote = F)
 
 ```
+
+** Need to fix the 28 duplicates! 
