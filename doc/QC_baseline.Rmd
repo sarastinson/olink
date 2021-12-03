@@ -228,5 +228,3 @@ olink_df <- INF_wide %>%
 write.table(olink_df, file = here::here("data/olink_CVDII_INF_baseline_plasma_wide.txt"), sep = "\t", quote = F)
 
 ```
-
-** Need to fix the 28 duplicates! 
