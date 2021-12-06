@@ -228,3 +228,17 @@ olink_df <- INF_wide %>%
 write.table(olink_df, file = here::here("data/olink_CVDII_INF_baseline_plasma_wide.txt"), sep = "\t", quote = F)
 
 ```
+
+```{r Create a Metadata File, warning = FALSE, message = FALSE}
+
+## Create a Metadata file
+metadata <- INF_qc %>%
+  dplyr::full_join(CVD_qc) %>%
+  dplyr::group_by(Assay) %>%
+  dplyr::select(UniProt, OlinkID, LOD, Panel, Panel_Version, MissingProp) %>% 
+  dplyr::distinct(Assay, .keep_all = TRUE)
+
+## Save metadata
+write.table(metadata, file = here::here("data/olink_panel_metadata.txt"), sep = "\t", quote = F)
+
+```
