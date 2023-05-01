@@ -1,4 +1,4 @@
-# Holbaek Olink
+# HOLBAEK Olink
 
 This project is for analyses of Olink data in The Holbaek Study
 
